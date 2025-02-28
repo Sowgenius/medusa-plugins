@@ -1,17 +1,15 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDecoratorMetadata": true,
+    "target": "es2019",
     "module": "commonjs",
-    "noEmit": false,
-    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "./dist",
     "esModuleInterop": true,
-    "outDir": ".",
-    "rootDir": "src",
-    "baseUrl": "./"
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "skipLibCheck": true
   },
   "include": ["src"],
-  "exclude": ["**/node_modules", "**/__tests__/*", "**/__e2e__/*"],
+  "exclude": ["node_modules", "**/__tests__/*", "dist"]
 }
