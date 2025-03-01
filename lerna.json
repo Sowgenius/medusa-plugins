@@ -1,18 +1,12 @@
 {
-  "packages": [
-    "packages/*"
-  ],
-  "npmClient": "yarn",
+  "version": "independent",
+  "npmClient": "pnpm",
   "useWorkspaces": true,
+  "packages": ["packages/*"],
   "command": {
     "publish": {
       "conventionalCommits": true,
-      "yes": false,
-      "ignoreChanges": [
-        "**/*.spec.ts"
-      ],
       "message": "chore(release): publish"
     }
-  },
-  "version": "independent"
+  }
 }
