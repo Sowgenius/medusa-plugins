@@ -16,5 +16,7 @@ coverage
 tsconfig.tsbuildinfo
 package-lock.json
 yarn.json
+yarn.lock 
+pnpm-lock.yaml
 
 .env.*
