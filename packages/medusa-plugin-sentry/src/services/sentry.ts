@@ -1,4 +1,4 @@
-import { EventBusService, TransactionBaseService } from '@medusajs/medusa';
+import { EventBusService, TransactionBaseService, Service } from '@medusajs/medusa';
 import axios from 'axios';
 import { EntityManager } from 'typeorm';
 import { MedusaContainer } from '@medusajs/types';
@@ -23,20 +23,29 @@ type InjectedDeps = {
   container: MedusaContainer;
 };
 
+@Service()
 export default class SentryService extends TransactionBaseService {
+  //replace with v2 service identifier pattern 
+  static readonly RESOLVE_KEY = 'SentryService';
   protected readonly sentryApiBaseUrl = 'https://sentry.io/api/0/organizations';
-  protected manager_: EntityManager;
-  protected transactionManager_: EntityManager | undefined;
+
+  //protected manager_: EntityManager;
+  //protected transactionManager_: EntityManager | undefined;
   protected readonly config_: SentryOptions;
   protected readonly eventBusService_: EventBusService;
-  protected readonly container_: MedusaContainer;
+  //protected readonly container_: MedusaContainer;
 
-  constructor({ manager, eventBusService, container }: InjectedDeps, config: SentryOptions) {
+  /*constructor({ manager, eventBusService, container }: InjectedDeps, config: SentryOptions) {
     super(arguments[0]);
     this.manager_ = manager;
     this.config_ = config;
     this.eventBusService_ = eventBusService;
     this.container_ = container;
+  }*/ 
+  constructor({ manager, eventBusService, container }: InjectedDeps, config: SentryOptions) {
+    super(manager);
+    this.config_ = config;
+    this.eventBusService_ = eventBusService;
   }
 
   /**
@@ -125,13 +134,16 @@ export default class SentryService extends TransactionBaseService {
   /**
    * Handles issue-related webhooks from Sentry and emits Medusa events.
    * @param data Webhook payload from Sentry.
+   *This method is responsible for handling Sentry webhooks and emitting Medusa events using proper trasnsaction management for v2 
    */
   async handleIssues(data: SentryWebHookData): Promise<void> {
-    await this.manager_.transaction(async (transactionManager) => {
+    return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnIssue)) {
         return await this.config_.webHookOptions.emitOnIssue(this.container_, data);
       }
-      await this.eventBusService_.emit(SentryWebHookEvent.SENTRY_RECEIVED_ISSUE, data);
+      await this.eventBusService_
+      .withTransaction(transactionManager)
+      .emit(SentryWebHookEvent.SENTRY_RECEIVED_ISSUE, data);
     });
   }
 
