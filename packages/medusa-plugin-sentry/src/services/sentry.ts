@@ -136,6 +136,7 @@ export default class SentryService extends TransactionBaseService {
    * @param data Webhook payload from Sentry.
    *This method is responsible for handling Sentry webhooks and emitting Medusa events using proper trasnsaction management for v2 
    */
+
   async handleIssues(data: SentryWebHookData): Promise<void> {
     return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnIssue)) {
@@ -144,6 +145,54 @@ export default class SentryService extends TransactionBaseService {
       await this.eventBusService_
       .withTransaction(transactionManager)
       .emit(SentryWebHookEvent.SENTRY_RECEIVED_ISSUE, data);
+    });
+  }
+
+
+  async handleError(data: SentryWebHookData): Promise<void> {
+    return this.atomicPhase_(async (transactionManager) => {
+      if (isFunction(this.config_.webHookOptions.emitOnError)) {
+        return await this.config_.webHookOptions.emitOnError(this.container_, data);
+      }
+      await this.eventBusService_
+      .withTransaction(transactionManager)
+      .emit(SentryWebHookEvent.SENTRY_RECEIVED_ERROR, data);
+    });
+  }
+
+
+  async handleAlert(data: SentryWebHookData): Promise<void> {
+    return this.atomicPhase_(async (transactionManager) => {
+      if (isFunction(this.config_.webHookOptions.emitOnEventOrMetricAlert)) {
+        return await this.config_.webHookOptions.emitOnEventOrMetricAlert(this.container_, data);
+      }
+      await this.eventBusService_
+      .withTransaction(transactionManager)
+      .emit(SentryWebHookEvent.SENTRY_RECEIVED_EVENT_OR_METRIC_ALERT, data);
+    });
+  }
+
+
+  async handleComment(data: SentryWebHookData): Promise<void> {
+    return this.atomicPhase_(async (transactionManager) => {
+      if (isFunction(this.config_.webHookOptions.emitOnComment)) {
+        return await this.config_.webHookOptions.emitOnComment(this.container_, data);
+      }
+      await this.eventBusService_
+      .withTransaction(transactionManager)
+      .emit(SentryWebHookEvent.SENTRY_RECEIVED_COMMENT, data);
+    });
+  }
+
+
+  async handleInstallation(data: SentryWebHookData): Promise<void> {
+    return this.atomicPhase_(async (transactionManager) => {
+      if (isFunction(this.config_.webHookOptions.emitOnInstallOrDeleted)) {
+        return await this.config_.webHookOptions.emitOnInstallOrDeleted(this.container_, data);
+      }
+      await this.eventBusService_
+      .withTransaction(transactionManager)
+      .emit(SentryWebHookEvent.SENTRY_RECEIVED_INSTALL_OR_DELETED, data);
     });
   }
 
