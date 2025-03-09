@@ -45,7 +45,7 @@ export default function (options: LoaderOptions): Router {
   }
 
   //attachSentryErrorHandler();
-  router.use(Sentry.Handlers.erroHandler({
+  router.use(Sentry.Handlers.errorHandler({
     shouldHandleError: () => true,
   }));
 

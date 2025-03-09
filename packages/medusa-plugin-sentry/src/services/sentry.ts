@@ -26,7 +26,8 @@ type InjectedDeps = {
 @Service()
 export default class SentryService extends TransactionBaseService {
   //replace with v2 service identifier pattern 
-  static readonly RESOLVE_KEY = 'sentryService';
+  //static readonly RESOLVE_KEY = 'sentryService';
+  static SCOPE = 'sentryService';
   protected readonly sentryApiBaseUrl = 'https://sentry.io/api/0/organizations';
 
   //protected manager_: EntityManager;
@@ -175,8 +176,17 @@ async fetchTransactionsStats({
   }
 }
 
-//TODO Method to link errors to user session 
-
+/**
+ * Associates user information with Sentry errors
+ * @param userId User ID from Medusa
+ * @param email Optional user email
+ */
+setUserContext(userId: string, email?: string): void {
+  Sentry.setUser({
+    id: userId,
+    email: email,
+  });
+}
   /**
    * Handles issue-related webhooks from Sentry and emits Medusa events.
    * @param data Webhook payload from Sentry.
