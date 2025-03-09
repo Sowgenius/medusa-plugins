@@ -132,4 +132,4 @@ function attachAdminEndPoints(router, options: LoaderOptions, pluginOptions) {
     authenticate(),
     sentryTransactionEventsHandler(apiToken)
   );
-}
+
