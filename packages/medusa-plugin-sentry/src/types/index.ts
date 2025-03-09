@@ -16,6 +16,14 @@ export type SentryWebHookOptions = {
   emitOnInstallOrDeleted?: boolean | ((container: Record<string, any>, data: SentryWebHookData) => Promise<void>);
 };
 
+// src/types/index.ts
+export type SentryErrorFilters = {
+  ignoredErrors?: string[];
+  ignoredRoutes?: string[];
+  ignoreStatusCodes?: number[];
+  shouldSendError?: (error: Error, req?: Request) => boolean;
+}
+
 export type SentryOptions = Omit<NodeOptions, 'integrations'> & {
   integrations: Integration[] | ((router: Router, sentry: typeof Sentry, tracing: typeof Tracing) => Integration[]);
   apiToken?: string;
@@ -24,6 +32,7 @@ export type SentryOptions = Omit<NodeOptions, 'integrations'> & {
   enableTracing?: boolean;
   webHookOptions?: SentryWebHookOptions;
   environment?: string;
+  errorFilters?: SentryErrorFilters;
 };
 
 export enum SentryWebHookEvent {
