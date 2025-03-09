@@ -42,7 +42,7 @@ export default class SentryService extends TransactionBaseService {
     this.eventBusService_ = eventBusService;
     this.container_ = container;
   }*/ 
-  constructor({ manager, eventBusService, container }: InjectedDeps, config: SentryOptions) {
+  constructor({ manager, eventBusService }: InjectedDeps, config: SentryOptions) {
     super(manager);
     this.config_ = config;
     this.eventBusService_ = eventBusService;
@@ -174,6 +174,9 @@ async fetchTransactionsStats({
     throw error;
   }
 }
+
+//TODO Method to link errors to user session 
+
   /**
    * Handles issue-related webhooks from Sentry and emits Medusa events.
    * @param data Webhook payload from Sentry.
