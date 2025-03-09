@@ -31,7 +31,9 @@ export default function (options: LoaderOptions): Router {
 
   Sentry.init({
     ...sentryOptions,
-    integrations: Array.isArray(integrations) ? integrations : integrations(router, Sentry, Tracing),
+    integrations: Array.isArray(integrations) 
+      ? integrations 
+      : integrations(router, Sentry, Tracing),
   });
 
   if (enableRequestHandler) {
@@ -42,8 +44,12 @@ export default function (options: LoaderOptions): Router {
     router.use(Sentry.Handlers.tracingHandler());
   }
 
-  attachSentryErrorHandler();
+  //attachSentryErrorHandler();
+  router.use(Sentry.Handlers.erroHandler({
+    shouldHandleError: () => true,
+  }));
 
+  //Attach routes 
   if (webHookOptions) {
     attachSentryWebHook(router, webHookOptions);
   }

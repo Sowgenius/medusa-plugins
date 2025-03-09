@@ -6,6 +6,7 @@ import { IsOptional, IsString } from 'class-validator';
 
 export default (token: string) => {
   return async (req: Request, res: Response) => {
+   try {  
     const { transaction, organisation, project, statsPeriod } = await validator(
       GetSentryTransactionsStatsParams,
       req.query
@@ -21,6 +22,13 @@ export default (token: string) => {
       token,
     });
     res.json(result);
+   } catch (error) {
+     console.error("Error fetching transactions:", error);
+     res.status(500).json({
+       error: "An error occurred while fetching transactions",
+       message: error.message
+     });
+   }
   };
 };
 

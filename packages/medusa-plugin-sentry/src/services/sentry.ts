@@ -26,7 +26,7 @@ type InjectedDeps = {
 @Service()
 export default class SentryService extends TransactionBaseService {
   //replace with v2 service identifier pattern 
-  static readonly RESOLVE_KEY = 'SentryService';
+  static readonly RESOLVE_KEY = 'sentryService';
   protected readonly sentryApiBaseUrl = 'https://sentry.io/api/0/organizations';
 
   //protected manager_: EntityManager;
@@ -131,6 +131,49 @@ export default class SentryService extends TransactionBaseService {
     return await this.fetchSentryData({ organisation, token, perPage, queryParams });
   }
 
+  /*
+   * Fetches performance transaction details from Sentry
+   * TODO : test it 
+  // */
+async fetchTransactionsStats({
+  transaction,
+  organisation,
+  project,
+  statsPeriod,
+  token,
+}: {
+  transaction?: string;
+  organisation: string;
+  project: string;
+  statsPeriod: string;
+  token: string;
+}): Promise<SentryStatsFetchResult> {
+  const queryParams = {
+    statsPeriod,
+    interval: '1h',
+    field: ['sum(transaction.duration)', 'count()'],
+    query: transaction 
+      ? `event.type:transaction AND transaction:"${transaction}"` 
+      : 'event.type:transaction',
+    project,
+  };
+  
+  const url = `${this.sentryApiBaseUrl}/${organisation}/events-stats/`;
+  
+  try {
+    const result = await this.fetchSentry({
+      organisation,
+      token,
+      queryParams,
+      customTargetPathSegment: 'events-stats/',
+    });
+    
+    return result as SentryStatsFetchResult;
+  } catch (error) {
+    console.error("Error fetching transaction stats:", error);
+    throw error;
+  }
+}
   /**
    * Handles issue-related webhooks from Sentry and emits Medusa events.
    * @param data Webhook payload from Sentry.
@@ -140,7 +183,7 @@ export default class SentryService extends TransactionBaseService {
   async handleIssues(data: SentryWebHookData): Promise<void> {
     return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnIssue)) {
-        return await this.config_.webHookOptions.emitOnIssue(this.container_, data);
+        return await this.config_.webHookOptions.emitOnIssue(data);
       }
       await this.eventBusService_
       .withTransaction(transactionManager)
@@ -149,10 +192,10 @@ export default class SentryService extends TransactionBaseService {
   }
 
 
-  async handleError(data: SentryWebHookData): Promise<void> {
+  async handleErrors(data: SentryWebHookData): Promise<void> {
     return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnError)) {
-        return await this.config_.webHookOptions.emitOnError(this.container_, data);
+        return await this.config_.webHookOptions.emitOnError(data);
       }
       await this.eventBusService_
       .withTransaction(transactionManager)
@@ -161,10 +204,10 @@ export default class SentryService extends TransactionBaseService {
   }
 
 
-  async handleAlert(data: SentryWebHookData): Promise<void> {
+  async handleAlerts(data: SentryWebHookData): Promise<void> {
     return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnEventOrMetricAlert)) {
-        return await this.config_.webHookOptions.emitOnEventOrMetricAlert(this.container_, data);
+        return await this.config_.webHookOptions.emitOnEventOrMetricAlert(data);
       }
       await this.eventBusService_
       .withTransaction(transactionManager)
@@ -173,10 +216,10 @@ export default class SentryService extends TransactionBaseService {
   }
 
 
-  async handleComment(data: SentryWebHookData): Promise<void> {
+  async handleComments(data: SentryWebHookData): Promise<void> {
     return this.atomicPhase_(async (transactionManager) => {
       if (isFunction(this.config_.webHookOptions.emitOnComment)) {
-        return await this.config_.webHookOptions.emitOnComment(this.container_, data);
+        return await this.config_.webHookOptions.emitOnComment(data);
       }
       await this.eventBusService_
       .withTransaction(transactionManager)

@@ -7,6 +7,7 @@ import { GetSentryTransactionsParams } from './sentry-transaction';
 
 export default (token: string) => {
   return async (req: Request, res: Response) => {
+   try { 
     const { transaction, organisation, project, statsPeriod, perPage, cursor, query } = await validator(
       GetSentryTransactionEventsParams,
       req.query
@@ -25,6 +26,13 @@ export default (token: string) => {
       token,
     });
     res.json(result);
+  } catch (error) {
+    console.error("Error fetching transaction: ", error);
+    res.status(500).json ({
+      error: "An error occurred while fetching transactions",
+      message: error.message
+    });
+   }
   };
 };
 
