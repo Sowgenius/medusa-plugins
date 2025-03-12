@@ -154,7 +154,7 @@ export default class SentryService extends TransactionBaseService {
 			sort: '-transaction',
 			cursor,
 		};
-		return await this.fetchSentryData({ organisation, token, perPage, queryParams });
+		return await this.fetchSentry({ organisation, token, queryParams });
 	}
 
 	/**
@@ -198,7 +198,7 @@ export default class SentryService extends TransactionBaseService {
 			sort: '-timestamp',
 			cursor,
 		};
-		return await this.fetchSentryData({ organisation, token, perPage, queryParams });
+		return await this.fetchSentry({ organisation, token, queryParams });
 	}
 
 	/*
